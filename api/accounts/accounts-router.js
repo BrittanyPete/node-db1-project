@@ -1,15 +1,30 @@
-const router = require('express').Router()
+const router = require('express').Router();
+const Accounts = require('./accounts-model');
+
+const { checkAccountId, checkAccountPayload, checkAccountNameUnique } = require('./accounts-middleware');
 
 router.get('/', (req, res, next) => {
-  // DO YOUR MAGIC
+  Accounts.getAll()
+  .then(accounts => {
+    res.json(accounts);
+  })
+  .catch(err => {
+    next({status: 500, message: 'could not get accounts'})
+  })
 })
 
-router.get('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.get('/:id', checkAccountId, (req, res, next) => {
+  console.log('res:', req.result)
+  res.json(req.result)
 })
 
-router.post('/', (req, res, next) => {
-  // DO YOUR MAGIC
+router.post('/', checkAccountPayload, checkAccountNameUnique, async (req, res, next) => {
+  try {
+    const data = await Accounts.create(req.body)
+    res.status(201).json(data)
+  } catch (err) {
+    next(err)
+  }
 })
 
 router.put('/:id', (req, res, next) => {
