@@ -27,16 +27,31 @@ router.post('/', checkAccountPayload, checkAccountNameUnique, async (req, res, n
   }
 })
 
-router.put('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.put('/:id', checkAccountId, checkAccountPayload, async (req, res, next) => {
+  try{
+    const data = await Accounts.updateById(req.params.id, req.body)
+    res.json(data)
+  }
+  catch (err) {
+    next(err)
+  }
 });
 
-router.delete('/:id', (req, res, next) => {
-  // DO YOUR MAGIC
+router.delete('/:id', checkAccountId, async (req, res, next) => {
+  try{
+    const acct = await Accounts.getById(req.params.id)
+    await Accounts.deleteById(req.params.id);
+    res.json(acct);
+  }
+  catch (err) {
+    next(err)
+  }
 })
 
 router.use((err, req, res, next) => { // eslint-disable-line
-  // DO YOUR MAGIC
+  res.status(err.status || 500).json({
+    message: err.message
+  })
 })
 
 module.exports = router;
